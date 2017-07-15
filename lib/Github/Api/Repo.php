@@ -8,12 +8,15 @@ use Github\Api\Repository\Commits;
 use Github\Api\Repository\Contents;
 use Github\Api\Repository\DeployKeys;
 use Github\Api\Repository\Downloads;
+use Github\Api\Repository\Projects;
+use Github\Api\Repository\Protection;
 use Github\Api\Repository\Releases;
 use Github\Api\Repository\Forks;
 use Github\Api\Repository\Hooks;
 use Github\Api\Repository\Labels;
 use Github\Api\Repository\Stargazers;
 use Github\Api\Repository\Statuses;
+use Github\Api\Repository\Traffic;
 
 /**
  * Searching repositories, getting repository information
@@ -37,7 +40,7 @@ class Repo extends AbstractApi
      */
     public function find($keyword, array $params = array())
     {
-        return $this->get('legacy/repos/search/'.rawurlencode($keyword), array_merge(array('start_page' => 1), $params));
+        return $this->get('/legacy/repos/search/'.rawurlencode($keyword), array_merge(array('start_page' => 1), $params));
     }
 
     /**
@@ -52,10 +55,10 @@ class Repo extends AbstractApi
     public function all($id = null)
     {
         if (!is_int($id)) {
-            return $this->get('repositories');
+            return $this->get('/repositories');
         }
 
-        return $this->get('repositories?since=' . rawurldecode($id));
+        return $this->get('/repositories?since=' . rawurldecode($id));
     }
 
     /**
@@ -70,7 +73,7 @@ class Repo extends AbstractApi
      */
     public function activity($username, $repository)
     {
-        return $this->get('repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/stats/commit_activity');
+        return $this->get('/repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/stats/commit_activity');
     }
 
     /**
@@ -85,7 +88,37 @@ class Repo extends AbstractApi
      */
     public function statistics($username, $repository)
     {
-        return $this->get('repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/stats/contributors');
+        return $this->get('/repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/stats/contributors');
+    }
+
+    /**
+     * Get a weekly aggregate of the number of additions and deletions pushed to a repository.
+     *
+     * @link http://developer.github.com/v3/repos/statistics/#code-frequency
+     *
+     * @param string $username   the user who owns the repository
+     * @param string $repository the name of the repository
+     *
+     * @return array list of weeks and their commit statistics
+     */
+    public function frequency($username, $repository)
+    {
+        return $this->get('/repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/stats/code_frequency');
+    }
+
+    /**
+     * Get the weekly commit count for the repository owner and everyone else.
+     *
+     * @link http://developer.github.com/v3/repos/statistics/#participation
+     *
+     * @param string $username   the user who owns the repository
+     * @param string $repository the name of the repository
+     *
+     * @return array list of weekly commit count grouped by 'all' and 'owner'
+     */
+    public function participation($username, $repository)
+    {
+        return $this->get('/repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/stats/participation');
     }
 
     /**
@@ -100,7 +133,7 @@ class Repo extends AbstractApi
      */
     public function org($organization, array $params = array())
     {
-        return $this->get('orgs/'.$organization.'/repos', array_merge(array('start_page' => 1), $params));
+        return $this->get('/orgs/'.$organization.'/repos', array_merge(array('start_page' => 1), $params));
     }
 
     /**
@@ -111,11 +144,28 @@ class Repo extends AbstractApi
      * @param string $username   the user who owns the repository
      * @param string $repository the name of the repository
      *
-     * @return array informations about the repository
+     * @return array information about the repository
      */
     public function show($username, $repository)
     {
-        return $this->get('repos/'.rawurlencode($username).'/'.rawurlencode($repository));
+        return $this->get('/repos/'.rawurlencode($username).'/'.rawurlencode($repository));
+    }
+
+    /**
+     * Get extended information about a repository by its id.
+     * Note: at time of writing this is an undocumented feature but GitHub support have advised that it can be relied on.
+     *
+     * @link http://developer.github.com/v3/repos/
+     * @link https://github.com/piotrmurach/github/issues/283
+     * @link https://github.com/piotrmurach/github/issues/282
+     *
+     * @param int $id   the id of the repository
+     *
+     * @return array information about the repository
+     */
+    public function showById($id)
+    {
+        return $this->get('/repositories/'.rawurlencode($id));
     }
 
     /**
@@ -148,7 +198,7 @@ class Repo extends AbstractApi
         $teamId = null,
         $autoInit = false
     ) {
-        $path = null !== $organization ? 'orgs/'.$organization.'/repos' : 'user/repos';
+        $path = null !== $organization ? '/orgs/'.$organization.'/repos' : '/user/repos';
 
         $parameters = array(
             'name'          => $name,
@@ -177,11 +227,11 @@ class Repo extends AbstractApi
      * @param string $repository the name of the repository
      * @param array  $values     the key => value pairs to post
      *
-     * @return array informations about the repository
+     * @return array information about the repository
      */
     public function update($username, $repository, array $values)
     {
-        return $this->patch('repos/'.rawurlencode($username).'/'.rawurlencode($repository), $values);
+        return $this->patch('/repos/'.rawurlencode($username).'/'.rawurlencode($repository), $values);
     }
 
     /**
@@ -196,7 +246,7 @@ class Repo extends AbstractApi
      */
     public function remove($username, $repository)
     {
-        return $this->delete('repos/'.rawurlencode($username).'/'.rawurlencode($repository));
+        return $this->delete('/repos/'.rawurlencode($username).'/'.rawurlencode($repository));
     }
 
     /**
@@ -206,12 +256,15 @@ class Repo extends AbstractApi
      *
      * @param string $username   the user who owns the repository
      * @param string $repository the name of the repository
+     * @param string $format     one of formats: "raw" or "html"
      *
      * @return array the readme content
      */
-    public function readme($username, $repository)
+    public function readme($username, $repository, $format = 'raw')
     {
-        return $this->get('repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/readme');
+        return $this->get('/repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/readme', [], [
+            'Accept' => "application/vnd.github.$format",
+        ]);
     }
 
     /**
@@ -371,12 +424,24 @@ class Repo extends AbstractApi
      */
     public function branches($username, $repository, $branch = null)
     {
-        $url = 'repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/branches';
+        $url = '/repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/branches';
         if (null !== $branch) {
             $url .= '/'.rawurlencode($branch);
         }
 
         return $this->get($url);
+    }
+
+    /**
+     * Manage the protection of a repository branch.
+     *
+     * @link https://developer.github.com/v3/repos/branches/#get-branch-protection
+     *
+     * @return Protection
+     */
+    public function protection()
+    {
+        return new Protection($this->client);
     }
 
     /**
@@ -393,7 +458,7 @@ class Repo extends AbstractApi
      */
     public function contributors($username, $repository, $includingAnonymous = false)
     {
-        return $this->get('repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/contributors', array(
+        return $this->get('/repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/contributors', array(
             'anon' => $includingAnonymous ?: null
         ));
     }
@@ -410,7 +475,7 @@ class Repo extends AbstractApi
      */
     public function languages($username, $repository)
     {
-        return $this->get('repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/languages');
+        return $this->get('/repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/languages');
     }
 
     /**
@@ -420,12 +485,13 @@ class Repo extends AbstractApi
      *
      * @param string $username   the user who owns the repository
      * @param string $repository the name of the repository
+     * @param array  $params     the additional parameters like milestone, assignees, labels, sort, direction
      *
      * @return array list of the repository tags
      */
-    public function tags($username, $repository)
+    public function tags($username, $repository, array $params = [])
     {
-        return $this->get('repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/tags');
+        return $this->get('/repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/tags', $params);
     }
 
     /**
@@ -440,7 +506,7 @@ class Repo extends AbstractApi
      */
     public function teams($username, $repository)
     {
-        return $this->get('repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/teams');
+        return $this->get('/repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/teams');
     }
 
     /**
@@ -454,7 +520,7 @@ class Repo extends AbstractApi
      */
     public function watchers($username, $repository, $page = 1)
     {
-        return $this->get('repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/watchers', array(
+        return $this->get('/repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/watchers', array(
             'page' => $page
         ));
     }
@@ -468,7 +534,7 @@ class Repo extends AbstractApi
      */
     public function subscribers($username, $repository, $page = 1)
     {
-        return $this->get('repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/subscribers', array(
+        return $this->get('/repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/subscribers', array(
             'page' => $page
         ));
     }
@@ -497,7 +563,7 @@ class Repo extends AbstractApi
             $parameters['commit_message'] = $message;
         }
 
-        return $this->post('repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/merges', $parameters);
+        return $this->post('/repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/merges', $parameters);
     }
 
     /**
@@ -507,6 +573,30 @@ class Repo extends AbstractApi
      */
     public function milestones($username, $repository)
     {
-        return $this->get('repos/'.rawurldecode($username).'/'.rawurldecode($repository).'/milestones');
+        return $this->get('/repos/'.rawurldecode($username).'/'.rawurldecode($repository).'/milestones');
+    }
+
+    public function projects()
+    {
+        return new Projects($this->client);
+    }
+
+    public function traffic()
+    {
+        return new Traffic($this->client);
+    }
+
+    /**
+     * @param string $username
+     * @param string $repository
+     * @param int    $page
+     *
+     * @return array|string
+     *
+     * @see https://developer.github.com/v3/activity/events/#list-repository-events
+     */
+    public function events($username, $repository, $page = 1)
+    {
+        return $this->get('/repos/'.rawurldecode($username).'/'.rawurldecode($repository).'/events', ['page' => $page]);
     }
 }

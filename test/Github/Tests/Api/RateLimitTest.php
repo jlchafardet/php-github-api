@@ -27,14 +27,17 @@ class RateLimitTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('get')
-            ->with('rate_limit')
+            ->with('/rate_limit')
             ->will($this->returnValue($expectedArray));
 
         $this->assertEquals($expectedArray, $api->getRateLimits());
     }
 
+    /**
+     * @return string
+     */
     protected function getApiClass()
     {
-        return 'Github\Api\RateLimit';
+        return \Github\Api\RateLimit::class;
     }
 }

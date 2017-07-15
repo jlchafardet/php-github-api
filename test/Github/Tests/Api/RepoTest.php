@@ -14,10 +14,26 @@ class RepoTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('get')
-            ->with('repos/KnpLabs/php-github-api')
+            ->with('/repos/KnpLabs/php-github-api')
             ->will($this->returnValue($expectedArray));
 
         $this->assertEquals($expectedArray, $api->show('KnpLabs', 'php-github-api'));
+    }
+
+    /**
+     * @test
+     */
+    public function shouldShowRepositoryById()
+    {
+        $expectedArray = array('id' => 123456, 'name' => 'repoName');
+
+        $api = $this->getApiMock();
+        $api->expects($this->once())
+            ->method('get')
+            ->with('/repositories/123456')
+            ->will($this->returnValue($expectedArray));
+
+        $this->assertEquals($expectedArray, $api->showById(123456));
     }
 
     /**
@@ -33,7 +49,7 @@ class RepoTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('get')
-            ->with('legacy/repos/search/php', array('myparam' => 2, 'start_page' => 1))
+            ->with('/legacy/repos/search/php', array('myparam' => 2, 'start_page' => 1))
             ->will($this->returnValue($expectedArray));
 
         $this->assertEquals($expectedArray, $api->find('php', array('myparam' => 2)));
@@ -52,7 +68,7 @@ class RepoTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('get')
-            ->with('legacy/repos/search/php', array('start_page' => 2))
+            ->with('/legacy/repos/search/php', array('start_page' => 2))
             ->will($this->returnValue($expectedArray));
 
         $this->assertEquals($expectedArray, $api->find('php', array('start_page' => 2)));
@@ -73,7 +89,7 @@ class RepoTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('get')
-            ->with('repositories')
+            ->with('/repositories')
             ->will($this->returnValue($expectedArray));
 
         $this->assertEquals($expectedArray, $api->all());
@@ -94,7 +110,7 @@ class RepoTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('get')
-            ->with('repositories?since=2')
+            ->with('/repositories?since=2')
             ->will($this->returnValue($expectedArray));
 
         $this->assertEquals($expectedArray, $api->all(2));
@@ -110,7 +126,7 @@ class RepoTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('post')
-            ->with('user/repos', array(
+            ->with('/user/repos', array(
                 'name'          => 'l3l0Repo',
                 'description'   => '',
                 'homepage'      => '',
@@ -135,7 +151,7 @@ class RepoTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('post')
-            ->with('orgs/KnpLabs/repos', array(
+            ->with('/orgs/KnpLabs/repos', array(
                 'name'          => 'KnpLabsRepo',
                 'description'   => '',
                 'homepage'      => '',
@@ -160,7 +176,7 @@ class RepoTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('get')
-            ->with('repos/KnpLabs/php-github-api/subscribers', array('page' => 2))
+            ->with('/repos/KnpLabs/php-github-api/subscribers', array('page' => 2))
             ->will($this->returnValue($expectedArray));
 
         $this->assertEquals($expectedArray, $api->subscribers('KnpLabs', 'php-github-api', 2));
@@ -176,7 +192,7 @@ class RepoTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('get')
-            ->with('repos/KnpLabs/php-github-api/tags')
+            ->with('/repos/KnpLabs/php-github-api/tags')
             ->will($this->returnValue($expectedArray));
 
         $this->assertEquals($expectedArray, $api->tags('KnpLabs', 'php-github-api'));
@@ -192,7 +208,7 @@ class RepoTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('get')
-            ->with('repos/KnpLabs/php-github-api/branches')
+            ->with('/repos/KnpLabs/php-github-api/branches')
             ->will($this->returnValue($expectedArray));
 
         $this->assertEquals($expectedArray, $api->branches('KnpLabs', 'php-github-api'));
@@ -208,7 +224,7 @@ class RepoTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('get')
-            ->with('repos/KnpLabs/php-github-api/branches/master')
+            ->with('/repos/KnpLabs/php-github-api/branches/master')
             ->will($this->returnValue($expectedArray));
 
         $this->assertEquals($expectedArray, $api->branches('KnpLabs', 'php-github-api', 'master'));
@@ -224,7 +240,7 @@ class RepoTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('get')
-            ->with('repos/KnpLabs/php-github-api/languages')
+            ->with('/repos/KnpLabs/php-github-api/languages')
             ->will($this->returnValue($expectedArray));
 
         $this->assertEquals($expectedArray, $api->languages('KnpLabs', 'php-github-api'));
@@ -240,7 +256,7 @@ class RepoTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('get')
-            ->with('repos/KnpLabs/php-github-api/milestones')
+            ->with('/repos/KnpLabs/php-github-api/milestones')
             ->will($this->returnValue($expectedArray));
 
         $this->assertEquals($expectedArray, $api->milestones('KnpLabs', 'php-github-api'));
@@ -256,7 +272,7 @@ class RepoTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('get')
-            ->with('repos/KnpLabs/php-github-api/contributors', array('anon' => null))
+            ->with('/repos/KnpLabs/php-github-api/contributors', array('anon' => null))
             ->will($this->returnValue($expectedArray));
 
         $this->assertEquals($expectedArray, $api->contributors('KnpLabs', 'php-github-api', false));
@@ -272,7 +288,7 @@ class RepoTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('get')
-            ->with('repos/KnpLabs/php-github-api/contributors', array('anon' => true))
+            ->with('/repos/KnpLabs/php-github-api/contributors', array('anon' => true))
             ->will($this->returnValue($expectedArray));
 
         $this->assertEquals($expectedArray, $api->contributors('KnpLabs', 'php-github-api', true));
@@ -288,7 +304,7 @@ class RepoTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('get')
-            ->with('repos/KnpLabs/php-github-api/teams')
+            ->with('/repos/KnpLabs/php-github-api/teams')
             ->will($this->returnValue($expectedArray));
 
         $this->assertEquals($expectedArray, $api->teams('KnpLabs', 'php-github-api'));
@@ -304,7 +320,7 @@ class RepoTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('post')
-            ->with('user/repos', array(
+            ->with('/user/repos', array(
                 'name'          => 'l3l0Repo',
                 'description'   => 'test',
                 'homepage'      => 'http://l3l0.eu',
@@ -329,7 +345,7 @@ class RepoTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('patch')
-            ->with('repos/l3l0Repo/test', array('description' => 'test', 'homepage' => 'http://l3l0.eu'))
+            ->with('/repos/l3l0Repo/test', array('description' => 'test', 'homepage' => 'http://l3l0.eu'))
             ->will($this->returnValue($expectedArray));
 
         $this->assertEquals($expectedArray, $api->update('l3l0Repo', 'test', array('description' => 'test', 'homepage' => 'http://l3l0.eu')));
@@ -343,7 +359,7 @@ class RepoTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('delete')
-            ->with('repos/l3l0Repo/test')
+            ->with('/repos/l3l0Repo/test')
             ->will($this->returnValue(null));
 
         $this->assertNull($api->remove('l3l0Repo', 'test'));
@@ -359,7 +375,7 @@ class RepoTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('delete')
-            ->with('repos/l3l0Repo/uknown-repo')
+            ->with('/repos/l3l0Repo/uknown-repo')
             ->will($this->returnValue($expectedArray));
 
         $this->assertEquals($expectedArray, $api->remove('l3l0Repo', 'uknown-repo'));
@@ -372,7 +388,7 @@ class RepoTest extends TestCase
     {
         $api = $this->getApiMock();
 
-        $this->assertInstanceOf('Github\Api\Repository\Collaborators', $api->collaborators());
+        $this->assertInstanceOf(\Github\Api\Repository\Collaborators::class, $api->collaborators());
     }
 
     /**
@@ -382,7 +398,7 @@ class RepoTest extends TestCase
     {
         $api = $this->getApiMock();
 
-        $this->assertInstanceOf('Github\Api\Repository\Comments', $api->comments());
+        $this->assertInstanceOf(\Github\Api\Repository\Comments::class, $api->comments());
     }
 
     /**
@@ -392,7 +408,7 @@ class RepoTest extends TestCase
     {
         $api = $this->getApiMock();
 
-        $this->assertInstanceOf('Github\Api\Repository\Commits', $api->commits());
+        $this->assertInstanceOf(\Github\Api\Repository\Commits::class, $api->commits());
     }
 
     /**
@@ -402,7 +418,7 @@ class RepoTest extends TestCase
     {
         $api = $this->getApiMock();
 
-        $this->assertInstanceOf('Github\Api\Repository\Contents', $api->contents());
+        $this->assertInstanceOf(\Github\Api\Repository\Contents::class, $api->contents());
     }
 
     /**
@@ -412,7 +428,7 @@ class RepoTest extends TestCase
     {
         $api = $this->getApiMock();
 
-        $this->assertInstanceOf('Github\Api\Repository\DeployKeys', $api->keys());
+        $this->assertInstanceOf(\Github\Api\Repository\DeployKeys::class, $api->keys());
     }
 
     /**
@@ -422,7 +438,7 @@ class RepoTest extends TestCase
     {
         $api = $this->getApiMock();
 
-        $this->assertInstanceOf('Github\Api\Repository\Downloads', $api->downloads());
+        $this->assertInstanceOf(\Github\Api\Repository\Downloads::class, $api->downloads());
     }
 
     /**
@@ -432,7 +448,7 @@ class RepoTest extends TestCase
     {
         $api = $this->getApiMock();
 
-        $this->assertInstanceOf('Github\Api\Repository\Forks', $api->forks());
+        $this->assertInstanceOf(\Github\Api\Repository\Forks::class, $api->forks());
     }
 
     /**
@@ -442,7 +458,7 @@ class RepoTest extends TestCase
     {
         $api = $this->getApiMock();
 
-        $this->assertInstanceOf('Github\Api\Repository\Hooks', $api->hooks());
+        $this->assertInstanceOf(\Github\Api\Repository\Hooks::class, $api->hooks());
     }
 
     /**
@@ -452,7 +468,7 @@ class RepoTest extends TestCase
     {
         $api = $this->getApiMock();
 
-        $this->assertInstanceOf('Github\Api\Repository\Labels', $api->labels());
+        $this->assertInstanceOf(\Github\Api\Repository\Labels::class, $api->labels());
     }
 
     /**
@@ -462,7 +478,7 @@ class RepoTest extends TestCase
     {
         $api = $this->getApiMock();
 
-        $this->assertInstanceOf('Github\Api\Repository\Statuses', $api->statuses());
+        $this->assertInstanceOf(\Github\Api\Repository\Statuses::class, $api->statuses());
     }
 
     /**
@@ -472,7 +488,7 @@ class RepoTest extends TestCase
     {
         $api = $this->getApiMock();
 
-        $this->assertInstanceOf('Github\Api\Repository\Stargazers', $api->stargazers());
+        $this->assertInstanceOf(\Github\Api\Repository\Stargazers::class, $api->stargazers());
     }
 
     /**
@@ -482,7 +498,7 @@ class RepoTest extends TestCase
     {
         $api = $this->getApiMock();
 
-        $this->assertInstanceOf('Github\Api\Repository\Releases', $api->releases());
+        $this->assertInstanceOf(\Github\Api\Repository\Releases::class, $api->releases());
     }
 
     /**
@@ -495,14 +511,35 @@ class RepoTest extends TestCase
         $api = $this->getApiMock();
         $api->expects($this->once())
             ->method('get')
-            ->with('repos/KnpLabs/php-github-api/stats/commit_activity')
+            ->with('/repos/KnpLabs/php-github-api/stats/commit_activity')
             ->will($this->returnValue($expectedArray));
 
         $this->assertEquals($expectedArray, $api->activity('KnpLabs', 'php-github-api'));
     }
 
+    /**
+     * @test
+     */
+    public function shouldGetRepositoryEvents()
+    {
+        $expectedArray = array('id' => 6122723754, 'type' => 'ForkEvent');
+
+        $api = $this->getApiMock();
+        $api->expects($this->once())
+            ->method('get')
+            ->with('/repos/KnpLabs/php-github-api/events', array(
+                'page' => 3,
+            ))
+            ->will($this->returnValue($expectedArray));
+
+        $this->assertEquals($expectedArray, $api->events('KnpLabs', 'php-github-api', 3));
+    }
+
+    /**
+     * @return string
+     */
     protected function getApiClass()
     {
-        return 'Github\Api\Repo';
+        return \Github\Api\Repo::class;
     }
 }

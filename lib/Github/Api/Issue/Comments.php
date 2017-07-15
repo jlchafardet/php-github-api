@@ -3,19 +3,25 @@
 namespace Github\Api\Issue;
 
 use Github\Api\AbstractApi;
+use Github\Api\AcceptHeaderTrait;
 use Github\Exception\MissingArgumentException;
 
 /**
  * @link   http://developer.github.com/v3/issues/comments/
  * @author Joseph Bielawski <stloyd@gmail.com>
+ * @author Tobias Nyholm <tobias.nyholm@gmail.com>
  */
 class Comments extends AbstractApi
 {
+    use AcceptHeaderTrait;
+
     /**
      * Configure the body type.
      *
      * @link https://developer.github.com/v3/issues/comments/#custom-media-types
      * @param string|null $bodyType
+     *
+     * @return self
      */
     public function configure($bodyType = null)
     {
@@ -23,9 +29,9 @@ class Comments extends AbstractApi
             $bodyType = 'full';
         }
 
-        $this->client->setHeaders(array(
-            sprintf('Accept: application/vnd.github.%s.%s+json', $this->client->getOption('api_version'), $bodyType)
-        ));
+        $this->acceptHeaderValue = sprintf('application/vnd.github.%s.%s+json', $this->client->getApiVersion(), $bodyType);
+
+        return $this;
     }
 
     /**
@@ -41,7 +47,7 @@ class Comments extends AbstractApi
      */
     public function all($username, $repository, $issue, $page = 1)
     {
-        return $this->get('repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/issues/'.rawurlencode($issue).'/comments', array(
+        return $this->get('/repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/issues/'.rawurlencode($issue).'/comments', array(
             'page' => $page
         ));
     }
@@ -58,7 +64,7 @@ class Comments extends AbstractApi
      */
     public function show($username, $repository, $comment)
     {
-        return $this->get('repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/issues/comments/'.rawurlencode($comment));
+        return $this->get('/repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/issues/comments/'.rawurlencode($comment));
     }
 
     /**
@@ -79,7 +85,7 @@ class Comments extends AbstractApi
             throw new MissingArgumentException('body');
         }
 
-        return $this->post('repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/issues/'.rawurlencode($issue).'/comments', $params);
+        return $this->post('/repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/issues/'.rawurlencode($issue).'/comments', $params);
     }
 
     /**
@@ -100,7 +106,7 @@ class Comments extends AbstractApi
             throw new MissingArgumentException('body');
         }
 
-        return $this->patch('repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/issues/comments/'.rawurlencode($comment), $params);
+        return $this->patch('/repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/issues/comments/'.rawurlencode($comment), $params);
     }
 
     /**
@@ -115,6 +121,6 @@ class Comments extends AbstractApi
      */
     public function remove($username, $repository, $comment)
     {
-        return $this->delete('repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/issues/comments/'.rawurlencode($comment));
+        return $this->delete('/repos/'.rawurlencode($username).'/'.rawurlencode($repository).'/issues/comments/'.rawurlencode($comment));
     }
 }
